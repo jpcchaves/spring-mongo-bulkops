@@ -2,12 +2,15 @@ package com.mongobulk.bulkops.service;
 
 import com.mongobulk.bulkops.model.Example;
 import com.mongobulk.bulkops.repository.ExampleMongoOpsRepository;
+import com.mongobulk.bulkops.repository.ExampleSpringRepository;
 import com.mongobulk.bulkops.utils.TimeUtils;
 import java.util.ArrayList;
 import java.util.List;
 import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,18 +18,17 @@ public class ExampleService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExampleService.class);
     private final ExampleMongoOpsRepository exampleRepository;
+    private final ExampleSpringRepository exampleSpringRepository;
     private final Faker faker;
 
-    public ExampleService(ExampleMongoOpsRepository exampleRepository, Faker faker) {
+    public ExampleService(ExampleMongoOpsRepository exampleRepository,
+            ExampleSpringRepository exampleSpringRepository, Faker faker) {
         this.exampleRepository = exampleRepository;
+        this.exampleSpringRepository = exampleSpringRepository;
         this.faker = faker;
     }
 
     public String getSaveMetric() {
-
-        logger.info("Start seeding db with examples...");
-
-        seedDb();
 
         List<Example> seededExamples = listAll();
 
@@ -70,10 +72,6 @@ public class ExampleService {
 
     public String getSaveBulkMetric() {
 
-        logger.info("Start seeding db with examples...");
-
-        seedDb();
-
         List<Example> seededExamples = listAll();
 
         logger.info("Started save bulk metrics....");
@@ -113,7 +111,7 @@ public class ExampleService {
         return String.format("This operation took %s seconds to finish", duration);
     }
 
-    private void seedDb() {
+    public String seedDb() {
 
         List<Example> examples = new ArrayList<>();
 
@@ -129,13 +127,20 @@ public class ExampleService {
         }
 
         exampleRepository.insertOrUpdateBulk(examples);
+
+        return "Finished seeding db";
     }
 
-    private List<Example> listAll() {
+    public List<Example> listAll() {
         List<Example> examplesList = exampleRepository.listAll();
 
         examplesList.forEach(e -> e.setName(faker.name().fullName()));
 
         return examplesList;
+    }
+
+    public Page<Example> listAll(Pageable pageable) {
+
+        return exampleSpringRepository.findAll(pageable);
     }
 }
