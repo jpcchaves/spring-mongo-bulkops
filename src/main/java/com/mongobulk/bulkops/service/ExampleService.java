@@ -111,6 +111,47 @@ public class ExampleService {
         return String.format("This operation took %s seconds to finish", duration);
     }
 
+    public String insertOrUpdateBulkInsertAll() {
+
+        List<Example> seededExamples = listAll();
+
+        logger.info("Started save bulk metrics....");
+
+        List<Example> examples = new ArrayList<>();
+
+        logger.info("Generating examples array with 10000 examples....");
+
+        for (int i = 0; i < 10000; i++) {
+
+            examples.add(
+                    new Example(
+                            faker.name().fullName(),
+                            faker.internet().emailAddress(),
+                            faker.phoneNumber().phoneNumber()
+                    )
+            );
+        }
+
+        logger.info("Finished generating array....");
+
+        logger.info("Addind seeded examples to new examples list..");
+        examples.addAll(seededExamples);
+
+        long startTime = System.currentTimeMillis();
+
+        logger.info("Start saving in bulk....");
+
+        exampleRepository.insertOrUpdateBulkInsertAll(examples);
+
+        long endTime = System.currentTimeMillis();
+
+        long duration = TimeUtils.calcDurationInSeconds(startTime, endTime);
+
+        logger.info("Process finished, total duration: {} seconds...", duration);
+
+        return String.format("This operation took %s seconds to finish", duration);
+    }
+
     public String seedDb() {
 
         List<Example> examples = new ArrayList<>();

@@ -31,6 +31,12 @@ public class ExampleController {
         return ResponseEntity.ok(exampleService.getSaveBulkMetric());
     }
 
+    @GetMapping("/save-bulk-insert-all")
+    public ResponseEntity<String> saveBulkInsertAll() {
+
+        return ResponseEntity.ok(exampleService.insertOrUpdateBulkInsertAll());
+    }
+
     @GetMapping("/seed")
     public ResponseEntity<String> seedDb() {
 
